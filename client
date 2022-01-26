@@ -29,19 +29,12 @@ args = p.parse_args()
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 port = 27993
 
+if args.socketparam:
+    s = ssl.wrap_socket(s)
 #All combos of p and s flags, didnt feel like doing this efficiently
-if args.portparam == None and args.socketparam == None:
-    port = 27993
-if args.portparam == None and args.socketparam:
-    port = 27994
-    sock = ssl.wrap_socket(sock)
-if args.portparam != None and args.socketparam == None:
-    port = args.portparam
-if args.portparam != None and args.socketparam:
-    port = args.portparam
-    sock = ssl.wrap_socket(sock)
 
-
+port = args.portparam if args.portparam != None else (
+	27994 if args.socketparam else 27993)
 
 #sock.connect(("proj1.3700.network", 27993))
 #trying to connect to hostname, if given invalid one throw error
