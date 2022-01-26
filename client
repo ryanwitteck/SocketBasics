@@ -1,0 +1,139 @@
+#!/usr/bin/env python3
+
+import socket
+import json
+import argparse
+import ssl
+import sys
+
+BUFFER = 1024 # no clue what the correct number is, hopefully this is enough
+
+
+#Create parser
+p = argparse.ArgumentParser(description="./client <-p port> <-s> <hostname> <Northeastern-username>")
+
+#Add params to parser:
+
+#p is either there or not, if not there, use 27993, if it is there use that
+p.add_argument('-p', type=int, required=False, help='the desired TCP port', dest='portparam')
+#if flag is given use TLS encrypted port, if not use 27993, if p is not given, use 27994
+p.add_argument('-s', action='store_true', required=False, help='Use an SSL encrypted socket or not', dest='socketparam')
+#hostname
+p.add_argument('hostname', type=str, help='name of the server')
+#Adding nuid
+p.add_argument('nu_id', type=str)
+#parse them together
+args = p.parse_args()
+
+#initialize connection
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+port = 27993
+
+#All combos of p and s flags, didnt feel like doing this efficiently
+if args.portparam is None and args.socketparam is None:
+    port = 27993
+if args.portparam is None and args.socketparam:
+    port = 27994
+    sock = ssl.wrap_socket(sock)
+if args.portparam and args.socketparam is None:
+    port = args.portparam
+if args.portparam and args.socketparam:
+    port = args.portparam
+    sock = ssl.wrap_socket(sock)
+
+
+
+#sock.connect(("proj1.3700.network", 27993))
+#trying to connect to hostname, if given invalid one throw error
+try:
+    sock.connect((args.hostname, port))
+except socket.error as err:
+    print('Unable to connect to {}, please enter a valid server'.format(err))
+    sys.exit(1)
+
+# our main function with all of the logic in it
+def wordle_guess(s, nu_id):
+    #create hello greeting to server
+    greeting = {"type": "hello", "northeastern_username": nu_id}
+    #convert to json and send
+    greetingjson = json.dumps(greeting)
+    #print(greetingjson.encode('utf-8'))
+    s.sendall(greetingjson.encode('utf-8'))
+    s.send("\n".encode('utf-8'))
+    response = s.recv(BUFFER)
+    res  = json.loads(response)
+    #get the message back from the server and decode to get the id
+    id = res['id'] #our id for each message
+
+    # My solution was to have a list for each character of what returned as a 0, as a 0 tells us just as much as a 2, so a  zero in one spot prevents a guess from occuring
+    alphabetzerolist = [list(), list(), list(), list(), list()]
+    #our developing solution
+    twoarray = [None, None, None, None, None]
+    #print(zeroarray)
+    secret_flag = None #our to-be flag
+    while secret_flag is None: #while we cannot find a flag, go through the file
+        with open('proj1-words.txt','r') as f:
+            for line in f: 
+                for word in line.split(): #essentially each word in the file
+
+                    flag = False #should we guess or not
+                    twoflag = False # is it a two or not
+                    
+                    if alphabetzerolist[0].count(word[0]) is  0 and alphabetzerolist[1].count(word[1]) is  0 and alphabetzerolist[2].count(word[2]) is  0 and alphabetzerolist[3].count(word[3]) is  0 and alphabetzerolist[4].count(word[4]) is  0: # iff empty list for index 0 doesnt have this letter we guess
+                        flag = True #we can guess
+                    
+                    if twoarray[0] is not None and twoarray[0] is not word[0] or twoarray[1] is not None and twoarray[1] is not word[1] or twoarray[2] is not None and twoarray[2] is not word[2] or twoarray[3] is not None and twoarray[3] is not word[3] or twoarray[4] is not None and twoarray[4] is not word[4]:
+                        twoflag = True #have a two but not matching, so dont guess this one
+                        
+                    if(flag is False):
+                        #print("breaking cuz 0")
+                        break
+                    
+                    if(twoflag):
+                        #print("breaking cuz not 2")
+                        break
+                    
+                    wordcomparing = {"type": "guess", "id": id, "word" : word } #make our string for guesses
+
+                    wordjson = json.dumps(wordcomparing) #moved to end at the end of implementation
+                    s.sendall(wordjson.encode('utf-8'))
+                    s.send("\n".encode('utf-8')) #convert to json and newline and guess
+
+                    initial = s.recv(BUFFER) # get answer
+                    words  = json.loads(initial) #TODO need to check type for retry and bye 
+
+                    if words['type'] ==  "bye": #if we got the correct word
+                        return words['flag']
+
+                    guessarray = words['guesses'][len(words['guesses'])-1]['marks'] #this would be the most recent mark given
+
+                    #checking each index for 0's, 1's, and 2's
+
+                    if guessarray[0] is 0 or guessarray[0] is 1: 
+                        alphabetzerolist[0].append(word[0])
+                    if guessarray[0] is 2 :
+                        twoarray[0] = word[0]
+
+                    if guessarray[1] is 0 or guessarray[1] is 1 :
+                        alphabetzerolist[1].append(word[1])
+                    if guessarray[1] is 2:
+                        twoarray[1] = word[1]
+
+                    if guessarray[2] is 0 or guessarray[2] is 1:
+                        alphabetzerolist[2].append(word[2])
+                    if guessarray[2] is 2:
+                        twoarray[2] = word[2]
+
+                    if guessarray[3] is 0 or guessarray[3] is 1:
+                        alphabetzerolist[3].append(word[3])
+                    if guessarray[3] is 2:
+                        twoarray[3] = word[3]
+                    
+                    if guessarray[4] is 0 or guessarray[4] is 1:
+                        alphabetzerolist[4].append(word[4])
+                    if guessarray[4] is 2:
+                        twoarray[4] = word[4]
+
+
+print(wordle_guess(sock, args.nu_id)) #print the secret key and close the socket
+sock.close()
