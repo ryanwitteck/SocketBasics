@@ -30,12 +30,12 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 port = 27993
 
 #All combos of p and s flags, didnt feel like doing this efficiently
-if args.portparam is None and args.socketparam is None:
+if args.portparam == None and args.socketparam == None:
     port = 27993
-if args.portparam is None and args.socketparam:
+if args.portparam == None and args.socketparam:
     port = 27994
     sock = ssl.wrap_socket(sock)
-if args.portparam and args.socketparam is None:
+if args.portparam and args.socketparam == None:
     port = args.portparam
 if args.portparam and args.socketparam:
     port = args.portparam
@@ -71,7 +71,7 @@ def wordle_guess(s, nu_id):
     twoarray = [None, None, None, None, None]
     #print(zeroarray)
     secret_flag = None #our to-be flag
-    while secret_flag is None: #while we cannot find a flag, go through the file
+    while secret_flag == None: #while we cannot find a flag, go through the file
         with open('proj1-words.txt','r') as f:
             for line in f: 
                 for word in line.split(): #essentially each word in the file
@@ -79,13 +79,13 @@ def wordle_guess(s, nu_id):
                     flag = False #should we guess or not
                     twoflag = False # is it a two or not
                     
-                    if alphabetzerolist[0].count(word[0]) is  0 and alphabetzerolist[1].count(word[1]) is  0 and alphabetzerolist[2].count(word[2]) is  0 and alphabetzerolist[3].count(word[3]) is  0 and alphabetzerolist[4].count(word[4]) is  0: # iff empty list for index 0 doesnt have this letter we guess
+                    if alphabetzerolist[0].count(word[0]) ==  0 and alphabetzerolist[1].count(word[1]) ==  0 and alphabetzerolist[2].count(word[2]) ==  0 and alphabetzerolist[3].count(word[3]) ==  0 and alphabetzerolist[4].count(word[4]) ==  0: # iff empty list for index 0 doesnt have this letter we guess
                         flag = True #we can guess
                     
-                    if twoarray[0] is not None and twoarray[0] is not word[0] or twoarray[1] is not None and twoarray[1] is not word[1] or twoarray[2] is not None and twoarray[2] is not word[2] or twoarray[3] is not None and twoarray[3] is not word[3] or twoarray[4] is not None and twoarray[4] is not word[4]:
+                    if twoarray[0]  != None and twoarray[0] != word[0] or twoarray[1] != None and twoarray[1] != word[1] or twoarray[2] != None and twoarray[2] != word[2] or twoarray[3] != None and twoarray[3] != word[3] or twoarray[4] != None and twoarray[4] != word[4]:
                         twoflag = True #have a two but not matching, so dont guess this one
                         
-                    if(flag is False):
+                    if(flag == False):
                         #print("breaking cuz 0")
                         break
                     
@@ -109,29 +109,29 @@ def wordle_guess(s, nu_id):
 
                     #checking each index for 0's, 1's, and 2's
 
-                    if guessarray[0] is 0 or guessarray[0] is 1: 
+                    if guessarray[0] == 0 or guessarray[0] == 1: 
                         alphabetzerolist[0].append(word[0])
-                    if guessarray[0] is 2 :
+                    if guessarray[0] == 2 :
                         twoarray[0] = word[0]
 
-                    if guessarray[1] is 0 or guessarray[1] is 1 :
+                    if guessarray[1] == 0 or guessarray[1] == 1 :
                         alphabetzerolist[1].append(word[1])
-                    if guessarray[1] is 2:
+                    if guessarray[1] == 2:
                         twoarray[1] = word[1]
 
-                    if guessarray[2] is 0 or guessarray[2] is 1:
+                    if guessarray[2] == 0 or guessarray[2] == 1:
                         alphabetzerolist[2].append(word[2])
-                    if guessarray[2] is 2:
+                    if guessarray[2] == 2:
                         twoarray[2] = word[2]
 
-                    if guessarray[3] is 0 or guessarray[3] is 1:
+                    if guessarray[3] == 0 or guessarray[3] == 1:
                         alphabetzerolist[3].append(word[3])
-                    if guessarray[3] is 2:
+                    if guessarray[3] == 2:
                         twoarray[3] = word[3]
                     
-                    if guessarray[4] is 0 or guessarray[4] is 1:
+                    if guessarray[4] == 0 or guessarray[4] == 1:
                         alphabetzerolist[4].append(word[4])
-                    if guessarray[4] is 2:
+                    if guessarray[4] == 2:
                         twoarray[4] = word[4]
 
 
