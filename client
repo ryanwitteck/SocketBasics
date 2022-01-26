@@ -30,7 +30,7 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 port = 27993
 
 if args.socketparam:
-    s = ssl.wrap_socket(s)
+    sock = ssl.wrap_socket(s)
 #All combos of p and s flags, didnt feel like doing this efficiently
 
 port = args.portparam if args.portparam != None else (
