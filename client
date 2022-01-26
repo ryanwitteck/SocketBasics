@@ -35,9 +35,9 @@ if args.portparam == None and args.socketparam == None:
 if args.portparam == None and args.socketparam:
     port = 27994
     sock = ssl.wrap_socket(sock)
-if args.portparam and args.socketparam == None:
+if args.portparam != None and args.socketparam == None:
     port = args.portparam
-if args.portparam and args.socketparam:
+if args.portparam != None and args.socketparam:
     port = args.portparam
     sock = ssl.wrap_socket(sock)
 
